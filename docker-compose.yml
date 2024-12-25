@@ -7,16 +7,6 @@ services:
     volumes:
       - ./data/redis:/data
 
-  oj-postgres:
-    image: postgres:10-alpine
-    restart: always
-    volumes:
-      - ./data/postgres:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_DB=onlinejudge
-      - POSTGRES_USER=onlinejudge
-      - POSTGRES_PASSWORD=onlinejudge
-
   oj-judge:
     image: registry.cn-hongkong.aliyuncs.com/oj-image/judge:1.6.1
     restart: always
@@ -37,7 +27,7 @@ services:
     environment:
       - SERVICE_URL=http://oj-judge:8080
       - BACKEND_URL=http://oj-backend:8000/api/judge_server_heartbeat/
-      - TOKEN=CHANGE_THIS
+      - TOKEN=${JUDGE_SERVER_TOKEN}
       # - judger_debug=1
 
   oj-backend:
@@ -45,16 +35,16 @@ services:
     restart: always
     depends_on:
       - oj-redis
-      - oj-postgres
       - oj-judge
     volumes:
       - ./data/backend:/data
     environment:
-      - POSTGRES_DB=onlinejudge
-      - POSTGRES_USER=onlinejudge
-      - POSTGRES_PASSWORD=onlinejudge
-      - JUDGE_SERVER_TOKEN=CHANGE_THIS
-      # - FORCE_HTTPS=1
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - JUDGE_SERVER_TOKEN=${JUDGE_SERVER_TOKEN}
+      - FORCE_HTTPS=1
       # - STATIC_CDN_HOST=cdn.oj.com
     ports:
       - "0.0.0.0:80:8000"
